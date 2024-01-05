@@ -1,0 +1,26 @@
+#######################################
+# Syntax Coloring Map for GFUltrasonic
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+GFUltrasonic	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+begin	KEYWORD2
+read	KEYWORD2
+setTimeout	KEYWORD2
+setTriggerPulse	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+E_GFULTRASONIC_CM	LITERAL1
+E_GFULTRASONIC_INCH	LITERAL1
