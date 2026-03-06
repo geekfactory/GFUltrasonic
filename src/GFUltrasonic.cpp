@@ -25,8 +25,9 @@ GFUltrasonic::GFUltrasonic(int triggerpin, int echopin, uint32_t timeout)
 	// store pin data
 	_triggerpin = triggerpin;
 	_echopin = echopin;
-	_singlepin = (_triggerpin == _echopin) ? true : false;
+	_singlepin = (_triggerpin == _echopin);
 	_timeout = timeout;
+	_triggerPulseLen = GFULTRASONIC_DEFAULT_TRIGGER_PULSE;
 }
 
 void GFUltrasonic::begin()
@@ -50,8 +51,14 @@ uint16_t GFUltrasonic::read(enum GFUltrasonicUnits units)
 	if (_singlepin)
 		pinMode(_triggerpin, INPUT);
 
-	// measure the response pulse length and calculate distance
-	return measurePulse() / ((units == E_GFULTRASONIC_CM) ? 58 : 142);
+	// measure the response pulse length
+	uint32_t pulsewidth = measurePulse();
+
+	// check for invalid measurement (timeout)
+	if (pulsewidth == 0)
+		return GFULTRASONIC_INVALID_MEASUREMENT;
+	// return the distance in the requested units by dividing the pulse width by the corresponding conversion factor
+	return pulsewidth / ((units == E_GFULTRASONIC_CM) ? GFULTRASONIC_US_PER_CM : GFULTRASONIC_US_PER_INCH);
 }
 
 void GFUltrasonic::setTimeout(uint32_t timeout)
@@ -81,13 +88,21 @@ uint32_t GFUltrasonic::measurePulse()
 
 	// wait for the start of the high pulse
 	pulse = micros();
-	while (LOW == digitalRead(_echopin) && (micros() - pulse) <= _timeout)
-		;
+	while (LOW == digitalRead(_echopin))
+	{
+		// return 0 (invalid measurement) if we have waited too long for the pulse to start
+		if ((micros() - pulse) > _timeout)
+			return 0;
+	}
 
 	// start measurement of the echo pulse (high level)
 	pulse = micros();
-	while (HIGH == digitalRead(_echopin) && (micros() - pulse) <= _timeout)
-		;
+	while (HIGH == digitalRead(_echopin))
+	{
+		// return 0 (invalid measurement) if we have waited too long for the pulse to end
+		if ((micros() - pulse) > _timeout)
+			return 0;
+	}
 
 	// return the time of the high pulse
 	return micros() - pulse;
