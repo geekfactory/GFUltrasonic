@@ -21,8 +21,9 @@
 // include the library header file
 #include <GFUltrasonic.h>
 
-// instantiate an object to use the ultrasonic sensor using pin 4 for trigger and pin 5 for echo
+// instantiate an object to use the ultrasonic sensor using pin 4 and 5 for interfacing
 GFUltrasonic ultrasonic(4, 5);
+
 void setup()
 {
 	// initialize serial port
@@ -34,13 +35,29 @@ void setup()
 
 void loop()
 {
-	// call read() to get the distance in centimeters
-	uint16_t distance = ultrasonic.read();
+	// call with parameter E_GFULTRASONIC_CM to get the distance in centimeters
+	uint16_t distance_cm = ultrasonic.read(E_GFULTRASONIC_CM);
+	// by default measurements are returned in cm, equivalent to the previous call is:
+	// uint16_t distance_cm = ultrasonic.read();
 
-	// print the result to the serial terminal
-	Serial.print(F("Measured distance: "));
-	Serial.print(distance);
-	Serial.println(F("cm"));
+	// call read with parameter E_GFULTRASONIC_INCH to get distance in inches
+	uint16_t distance_in = ultrasonic.read(E_GFULTRASONIC_INCH);
+
+	// check measurement validity and print to serial terminal
+	if (distance_cm != GFULTRASONIC_INVALID_MEASUREMENT && distance_in != GFULTRASONIC_INVALID_MEASUREMENT)
+	{
+		// print the result to the serial terminal
+		Serial.print(F("Measured distance: "));
+		Serial.print(distance_cm);
+		Serial.println(F("centimeters"));
+		Serial.println(F(" or "));
+		Serial.print(distance_in);
+		Serial.println(F("inches"));
+	}
+	else
+	{
+		Serial.println(F("Measurement timeout"));
+	}
 
 	// wait before doing the next measurement
 	delay(1000);

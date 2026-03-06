@@ -23,6 +23,7 @@
 
 // instantiate an object to use the ultrasonic sensor using pin 4 for trigger and pin 5 for echo
 GFUltrasonic ultrasonic(4, 5);
+
 void setup()
 {
 	// initialize serial port
@@ -30,6 +31,14 @@ void setup()
 
 	// call begin() to get the IO pins initialized by the library
 	ultrasonic.begin();
+
+	// set the timeout to 11600 microseconds, which corresponds to a
+	// maximum distance of 2 meters (11600 us / 58 us/cm = 200 cm)
+	ultrasonic.setTimeout(11600);
+
+	// set the pulse duration to 15 microseconds, which is slightly
+	// longer than the default 10 microseconds
+	ultrasonic.setTriggerPulse(15);
 }
 
 void loop()

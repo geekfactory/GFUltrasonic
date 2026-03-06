@@ -23,6 +23,7 @@
 
 // instantiate an object to use the ultrasonic sensor using pin 4 for trigger and pin 5 for echo
 GFUltrasonic ultrasonic(4, 5);
+
 void setup()
 {
 	// initialize serial port
@@ -34,13 +35,21 @@ void setup()
 
 void loop()
 {
-	// call read() to get the distance in centimeters
-	uint16_t distance = ultrasonic.read();
+	// call readMedian() to get the distance measurement using the median of multiple samples.
+	// the first argument is the number of samples to take for the median calculation, and the second argument is the units for the measurement
+	uint16_t distance = ultrasonic.readMedian(9, E_GFULTRASONIC_CM);
 
-	// print the result to the serial terminal
-	Serial.print(F("Measured distance: "));
-	Serial.print(distance);
-	Serial.println(F("cm"));
+	if (distance != GFULTRASONIC_INVALID_MEASUREMENT)
+	{
+		// print the result to the serial terminal
+		Serial.print(F("Measured distance: "));
+		Serial.print(distance);
+		Serial.println(F("cm"));
+	}
+	else
+	{
+		Serial.println(F("Measurement failed: timeout occurred"));
+	}
 
 	// wait before doing the next measurement
 	delay(1000);
