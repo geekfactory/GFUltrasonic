@@ -61,6 +61,52 @@ uint16_t GFUltrasonic::read(enum GFUltrasonicUnits units)
 	return pulsewidth / ((units == E_GFULTRASONIC_CM) ? GFULTRASONIC_US_PER_CM : GFULTRASONIC_US_PER_INCH);
 }
 
+uint16_t GFUltrasonic::readMedian(uint8_t samples, enum GFUltrasonicUnits units)
+{
+	uint16_t measurements[9]; // maximum of 9 samples
+	uint16_t valid = 0;	  // count of valid measurements
+
+	// ensure the number of samples is odd and between 3 and 9 to have a single median value and avoid dynamic memory allocation
+	if (samples < 3)
+		samples = 3;
+	if ((samples & 1) == 0)
+		samples++;
+	if (samples > 9)
+		samples = 9;
+
+	for (uint8_t i = 0; i < samples; i++)
+	{
+		// read a measurement and store it if it's valid
+		uint16_t d = read(units);
+
+		if (d != GFULTRASONIC_INVALID_MEASUREMENT)
+			measurements[valid++] = d;
+
+		// add a small delay between samples to avoid interference between measurements
+		delay(10);
+	}
+
+	// if we don't have any valid measurement, return the invalid measurement value
+	if (valid == 0)
+		return GFULTRASONIC_INVALID_MEASUREMENT;
+
+	// sort the measurements using insertion sort
+	for (uint8_t i = 1; i < valid; i++)
+	{
+		uint16_t key = measurements[i];
+		int j = i - 1;
+		while (j >= 0 && measurements[j] > key)
+		{
+			measurements[j + 1] = measurements[j];
+			j--;
+		}
+		measurements[j + 1] = key;
+	}
+
+	// return the median value
+	return measurements[valid / 2];
+}
+
 void GFUltrasonic::setTimeout(uint32_t timeout)
 {
 	_timeout = timeout;

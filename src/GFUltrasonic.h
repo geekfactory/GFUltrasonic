@@ -57,6 +57,13 @@ constexpr uint32_t GFULTRASONIC_DEFAULT_TIMEOUT = 29000UL;
 constexpr uint32_t GFULTRASONIC_DEFAULT_TRIGGER_PULSE = 10UL;
 
 /**
+ * Minimum and maximum number of samples for the median calculation in the readMedian() member function. Keep this small
+ * so it can be stored in the stack and avoid dynamic memory allocation.
+ */
+constexpr uint8_t GFULTRASONIC_MEDIAN_MIN_SAMPLES = 3;
+constexpr uint8_t GFULTRASONIC_MEDIAN_MAX_SAMPLES = 9;
+
+/**
  * Defines the units of the distance measurement
  */
 enum GFUltrasonicUnits
@@ -126,17 +133,17 @@ public:
 
 	/**
 	 * @brief Read the distance using the median of multiple samples.
-	 * 
+	 *
 	 * Reads the distance from the ultrasonic sensor by taking multiple samples and returning
 	 * the median value. This can help to reduce the effect of outliers and improve the accuracy
 	 * of the measurement.
-	 * 
+	 *
 	 * @param samples The number of samples to take for the median calculation. Default is 3,
 	 * minimum is 3 and maximum is 9. If an even number is provided, it will be incremented to
 	 * the next odd number to ensure a single median value.
 	 * @param units A value (as defined in GFUltrasonicUnits enum) indicating if we want to read
 	 * the distance in cm or inches.
-	 * 
+	 *
 	 * @return The median of the measured distance samples in either cm (default) or inches.
 	 */
 	uint16_t readMedian(uint8_t samples = 3, enum GFUltrasonicUnits units = E_GFULTRASONIC_CM);
